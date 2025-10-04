@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgresTodo
+    environment:
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: yourStrongP@ss
+      POSTGRES_DB: tododb
+      TZ: Asia/Colombo
+    ports:
+      - "5432:5432"     # if 5432 is busy on your host, change left side to 5433:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    # keep whatever you already had for build/image
+    build:
+      context: ./backend/TodoApi    # <-- adjust if your Dockerfile is elsewhere
+      dockerfile: Dockerfile
+    container_name: todoapp-backend-1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # API listens on 5053 inside the container
+      ASPNETCORE_URLS: "http://+:5053"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # Important: use service name 'postgres' as host
+      ConnectionStrings__TodoDbContext: "Host=postgres;Port=5432;Database=tododb;Username=todo_user;Password=yourStrongP@ss"
+    ports:
+      - "5053:5053"
+
+  frontend:
+    build:
+      context: ./frontend          # <-- adjust to your actual frontend path
+      dockerfile: Dockerfile
+    container_name: todoapp-frontend-1
+    ports:
+      - "3000:3000"
+    # If your frontend calls the backend, expose an env var it uses, e.g.:
+    # environment:
+    #   VITE_API_BASE_URL: "http://localhost:5053"
+
+volumes:
+  pgdata:
