@@ -8,13 +8,13 @@ using TodoApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
-builder.Services.AddDbContext<TodoDbContext>(opts =>
-    opts.UseNpgsql(builder.Configuration.GetConnectionString("TodoDbContext")));
-
+builder.Services.AddDbContext<TodoDbContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("TodoDbContext"));
+});
 
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ITodoService, TodoService>();
