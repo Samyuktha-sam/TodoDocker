@@ -41,6 +41,20 @@ public class TodoService : ITodoService
         }
     }
 
+
+    public List<TodoTask> GetRecentFiveTasks()
+    {
+        try
+        {
+            return _todoRepository.GetRecentFiveTasks();
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+
+    }
+
     public TodoTask GetTodoTask(int id)
     {
         try
@@ -91,4 +105,5 @@ public class TodoService : ITodoService
             throw new Exception( e.Message);
         }
     }
+
 }

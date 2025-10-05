@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TodoApi.Models;
 
-[Table("Tasks")]
+[Table("Task")]
 public class TodoTask
 {
     [Key]
@@ -12,19 +12,24 @@ public class TodoTask
 
     [Required(ErrorMessage = "Title is required")]
     [StringLength(100, ErrorMessage = "Title length can't be more than 100 characters.")]
+    [Column(TypeName = "varchar(100)")]
     public string Title { get; set; }
 
     [StringLength(600, ErrorMessage = "Description length can't be more than 600 characters.")]
+    [Column(TypeName = "varchar(600)")]
     public string Description { get; set; }
 
     public bool IsCompleted { get; set; } = false;
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    
+    [Column(TypeName = "timestamp with time zone")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
     public Priority Priority { get; set; } = Priority.Low;
 }
 
 public enum Priority
 {
     Low = 0,
-    Medium =1,
-    High=2
+    Medium = 1,
+    High = 2
 }

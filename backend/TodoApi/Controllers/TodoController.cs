@@ -29,7 +29,7 @@ public class TodoController : ControllerBase
         }
     }
     
-    [HttpGet]
+    [HttpGet("/all")]
     public ActionResult<List<TodoTask>> GetTodoTasks()
     {
         try
@@ -41,7 +41,20 @@ public class TodoController : ControllerBase
             return BadRequest(e.Message);
         }
     }
-    
+
+    [HttpGet]
+    public ActionResult<List<TodoTask>> GetRecentFiveTasks()
+    {
+        try
+        {
+            return _todoService.GetRecentFiveTasks();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
     [HttpGet("{id}")]
     public ActionResult<TodoTask> GetTodoTask(int id)
     {

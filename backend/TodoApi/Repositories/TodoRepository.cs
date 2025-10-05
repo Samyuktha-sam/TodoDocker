@@ -16,13 +16,13 @@ public class TodoRepository : ITodoRepository
     {
         try
         {
-            if (_context.Tasks.Any(t => t.Title == todoTask.Title))
+            if (_context.Task.Any(t => t.Title == todoTask.Title))
             {
                 throw new Exception("Title already exists");
             }
             else
             {
-                _context.Tasks.Add(todoTask);
+                _context.Task.Add(todoTask);
                 _context.SaveChanges();
                 return todoTask;
             }
@@ -37,11 +37,11 @@ public class TodoRepository : ITodoRepository
     {
         try
         {
-            if (!_context.Tasks.Any())
+            if (!_context.Task.Any())
             {
                 throw new Exception("No tasks found");
             }
-            return _context.Tasks.OrderBy(t => t.IsCompleted)
+            return _context.Task.OrderBy(t => t.IsCompleted)
                 .ThenByDescending(t => t.Priority)
                 .ThenBy(t => t.CreatedAt)
                 .ToList();
@@ -54,7 +54,7 @@ public class TodoRepository : ITodoRepository
 
     public TodoTask GetTodoTask(int id)
     {
-        TodoTask? todoTask = _context.Tasks.Find(id);
+        TodoTask? todoTask = _context.Task.Find(id);
         if (todoTask == null)
         {
             throw new Exception("Task not found");
@@ -63,9 +63,27 @@ public class TodoRepository : ITodoRepository
         return todoTask;
     }
 
+    public List<TodoTask> GetRecentFiveTasks()
+    {
+        try
+        {
+            if (!_context.Task.Any())
+            {
+                throw new Exception("No tasks found");
+            }
+            return _context.Task.OrderByDescending(t => t.CreatedAt)
+                .Take(5)
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
     public TodoTask UpdateTodoTask(int id, TodoTask todoTask)
     {
-        TodoTask? task = _context.Tasks.Find(id);
+        TodoTask? task = _context.Task.Find(id);
         if (task == null)
         {
             throw new Exception("Task not found");
@@ -81,7 +99,7 @@ public class TodoRepository : ITodoRepository
 
     public void DeleteTodoTask(int id)
     {
-        TodoTask? task = _context.Tasks.Find(id);
+        TodoTask? task = _context.Task.Find(id);
         if (task == null)
         {
             throw new Exception("Task not found");
@@ -89,7 +107,7 @@ public class TodoRepository : ITodoRepository
 
         try
         {
-            _context.Tasks.Remove(task);
+            _context.Task.Remove(task);
             _context.SaveChanges();
         }
         catch (Exception e)

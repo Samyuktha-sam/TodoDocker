@@ -35,7 +35,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Version = "v1",
         Title = "Todo API",
-        Description = "CURD operations for Todo tasks",
+        Description = "CRUD operations for Todo tasks",
     });
 });
 

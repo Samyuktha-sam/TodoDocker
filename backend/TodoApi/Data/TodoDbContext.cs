@@ -5,7 +5,7 @@ namespace TodoApi.Data;
 
 public class TodoDbContext : DbContext
 {
-    public DbSet<TodoTask> Tasks { get; set; }
+    public DbSet<TodoTask> Task { get; set; }
 
     public TodoDbContext(DbContextOptions<TodoDbContext> options) : base(options)
     {

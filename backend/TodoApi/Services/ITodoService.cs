@@ -7,6 +7,7 @@ public interface ITodoService
 {
     TodoTask CreateTodoTask(CreateTaskRequest todoRequest);
     List<TodoTask> GetTodoTasks();
+    List<TodoTask> GetRecentFiveTasks();
     TodoTask GetTodoTask(int id);
     TodoTask UpdateTodoTask(int id, CreateTaskRequest todoRequest);
     void DeleteTodoTask(int id);
