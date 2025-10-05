@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   backend:
-    image: todoapp/backend
+    image: backend/todoapp
     build:
       context: ./backend/TodoApi
       dockerfile: Dockerfile
@@ -14,8 +12,9 @@ services:
       - todoapp-network
     environment:
       - ASPNETCORE_URLS=http://+:5053
-    # depends_on:
-    #   - sqlite
+      - ConnectionStrings__TodoDbContext=Host=database;Port=5432;Database=tododb;Username=postgres;Password=yourpassword
+    depends_on:
+      - database
 
   frontend:
     image: todoapp/frontend
@@ -30,13 +29,28 @@ services:
     networks:
       - todoapp-network
 
-  # sqlite:
-  #   image: nouchka/sqlite3
-  #   volumes:
-  #     - ./backend/TodoApi/todoDev.db:/todoDev.db
-  #   networks:
-  #     - todoapp-network
+  database:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=yourpassword
+      - POSTGRES_DB=tododb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-postgres-data:/var/lib/postgresql/data
+    networks:
+      - todoapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   todoapp-network:
     driver: bridge
+
+volumes:
+    db-postgres-data:
