@@ -90,4 +90,8 @@ public class TodoDbContext : DbContext
             }
         );
     }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TodoTask>().ToTable("task");
+    }
 }

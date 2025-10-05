@@ -1,9 +1,12 @@
 
 # Todo Application
 
+
 ## Overview
 
 This Todo Application allows users to manage their tasks by providing functionalities to create, read, update, and delete tasks. The backend is built with C# .NET and an SQLite database, while the frontend is developed using ReactJS with TypeScript, Vite, Tailwind CSS, and React Query.
+![Image](https://github.com/user-attachments/assets/0d83076c-b6d2-49e5-b53f-40e9e4b5c623)
+TodoApp home view. Each task shows its priority via symbols (red upward arrow = High, yellow exclamation = Medium, green downward arrow = Low). The list displays the 6 most recent tasks. When a task is ticked as completed, it appears with strikethrough text and is removed from the active list.
 
 ## Table of Contents
 
