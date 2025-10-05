@@ -1,137 +1,87 @@
-import React, {useState} from "react";
-// import {toast} from "react-hot-toast";
-import {FaEdit, FaTrash, FaArrowDown, FaExclamation, FaArrowUp} from 'react-icons/fa';
+import React, { useState } from "react";
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import {TodoItemProps, Priority} from '../types/Todo';
-import {
-    useCompleteTodoTask,
-    useDeleteTodoTask,
-} from "../services/TodoApiService.ts";
+import {useCompleteTodoTask, useDeleteTodoTask} from "../services/TodoApiService.ts";
 import TaskForm from "./TaskForm.tsx";
 
-
 const TodoItem: React.FC<TodoItemProps> = ({todo}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const completeMutation = useCompleteTodoTask();
     const deleteMutation = useDeleteTodoTask();
-    const [isEditing, setIsEditing] = useState(false);
 
-    const handleComplete =  () => {
+    const handleComplete = () => {
         completeMutation.mutate(todo.id);
     };
 
     const handleDelete = () => {
-        window.confirm("Are you sure you want to delete this task?") && deleteMutation.mutate(todo.id);
-        // toast.custom((t) => (
-        //     <div className="max-w-md w-full bg-white shadow-lg rounded-lg
-        //     pointer-events-auto flex flex-col ring-1 ring-black ring-opacity-5">
-        //         <div className="flex  p-4">
-        //             <p className="text-sm font-medium text-gray-900">
-        //                 <strong>Are you sure you want to delete this task?</strong>
-        //             </p>
-        //         </div>
-        //         <div className="flex border-t border-gray-200">
-        //             <button
-        //                 onClick={() => {
-        //                     deleteMutation.mutate(todo.id);
-        //                     toast.dismiss(t.id);
-        //                 }}
-        //                 className="w-full border border-transparent rounded-none p-4
-        //                 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500
-        //                 focus:outline-none focus:ring-2 focus:ring-red-500"
-        //             >
-        //                 Confirm
-        //             </button>
-        //             <button
-        //                 onClick={() => toast.dismiss(t.id)}
-        //                 className="w-full border border-transparent rounded-none p-4
-        //                 flex items-center justify-center text-sm font-medium text-indigo-600
-        //                 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        //             >
-        //                 Cancel
-        //             </button>
-        //         </div>
-        //     </div>
-        // ),{position: "top-center"});
-    };
-
-    const handleCloseEdit = () => {
-        setIsEditing(false);
-    }
-
-    const handleEdit = () => {
-        setIsEditing(true);
-    }
-
-    const getPriorityIcon = () => {
-        switch (todo.priority) {
-            case Priority.LOW:
-                return <FaArrowDown className="text-green-500"/>;
-            case Priority.MEDIUM:
-                return <FaExclamation className="text-yellow-500"/>;
-            case Priority.HIGH:
-                return <FaArrowUp className="text-red-500"/>;
-            default:
-                return null;
+        if (window.confirm("Are you sure you want to delete this task?")) {
+            deleteMutation.mutate(todo.id);
         }
     };
 
-    const handleExpand = () => setIsExpanded(!isExpanded);
-
     return (
-        <div>
-            <div
-                className={`bg-gray-50 shadow-md rounded-lg px-4 py-2 m-2 grid grid-cols-1 items-center justify-between space-x-4 ${todo.isCompleted ? 'opacity-50 line-through' : ''}`}
-                onClick={handleExpand}
-            >
-                <div className={"flex flex-row justify-between"}>
-                    <div className="flex items-center content-center space-x-4">
-                        <input
-                            type="checkbox"
-                            className="form-checkbox h-4 w-4"
-                            checked={todo.isCompleted}
-                            onChange={handleComplete}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <p className="text-lg font-semibold">{todo.title}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <div className="p-2">{getPriorityIcon()}</div>
-                        <button className="p-2 text-blue-500" onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit();
-                        }}><FaEdit/></button>
-                        <button className="p-2 text-red-500" onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete();
-                        }}><FaTrash/></button>
+        <>
+            <div className="bg-gray-100 rounded-lg p-4 mb-3 group">
+                <div className="flex flex-col">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex-grow">
+                            <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-lg font-medium">{todo.title}</h3>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                    todo.priority === Priority.LOW 
+                                        ? 'bg-green-100 text-green-800'
+                                        : todo.priority === Priority.MEDIUM
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-red-100 text-red-800'
+                                }`}>
+                                    {todo.priority === Priority.LOW 
+                                        ? 'Low'
+                                        : todo.priority === Priority.MEDIUM
+                                            ? 'Medium'
+                                            : 'High'}
+                                </span>
+                            </div>
+                            <p className="text-gray-600 text-sm">{todo.description}</p>
+                        </div>
+                        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+                                title="Edit"
+                            >
+                                <FaPencilAlt size={14} />
+                            </button>
+                            <button 
+                                onClick={handleDelete}
+                                className="p-2 text-gray-500 hover:text-red-600 rounded-full hover:bg-red-100 transition-colors"
+                                title="Delete"
+                            >
+                                <FaTrash size={14} />
+                            </button>
+                            <button 
+                                onClick={handleComplete}
+                                className="px-4 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+                            >
+                                Done
+                            </button>
+                        </div>
                     </div>
                 </div>
-                {isExpanded && (
-                    <div>
-                        <p className="mb-2">{todo.description}</p>
-                        <p className="text-gray-500 text-sm">Created at: {todo.createdAt.toLocaleString()}</p>
-                    </div>
-                )}
             </div>
 
             {isEditing && (
-                <div
-                    className="fixed inset-0 flex items-center justify-center z-50"
-                    onClick={handleCloseEdit}
-                >
-                    <div
-                        className="absolute inset-0 bg-gray-600 opacity-50"
-                        onClick={handleCloseEdit}
-                    ></div>
-                    <div
-                        className="bg-transparent p-4 rounded-lg  z-10 max-w-md w-full"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <TaskForm task={todo} isEditing={true} onUpdateSuccess={handleCloseEdit}/>
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                    <div className="bg-white p-4 rounded-lg shadow-lg max-w-xl w-full mx-4">
+                        <TaskForm 
+                            task={todo} 
+                            isEditing={true} 
+                            onClose={() => setIsEditing(false)}
+                            onSuccess={() => setIsEditing(false)}
+                        />
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

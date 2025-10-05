@@ -1,15 +1,15 @@
 import React, {useState} from 'react';
-import {FaArrowDown, FaExclamation, FaArrowUp} from 'react-icons/fa';
 import {TodoCreateRequest, Priority, TodoTask} from '../types/Todo';
 import {useCreateTodoTask, useUpdateTodoTask} from "../services/TodoApiService.ts";
 
 interface TaskFormProps {
     task?: TodoTask;
     isEditing?: boolean;
-    onUpdateSuccess?: () => void;
+    onClose?: () => void;
+    onSuccess?: () => void;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({task, isEditing, onUpdateSuccess}) => {
+const TaskForm: React.FC<TaskFormProps> = ({ task, isEditing, onClose, onSuccess }) => {
     const [title, setTitle] = useState(task?.title || '');
     const [description, setDescription] = useState(task?.description || '');
     const [priority, setPriority] = useState<Priority>(task?.priority || Priority.LOW);
@@ -25,31 +25,26 @@ const TaskForm: React.FC<TaskFormProps> = ({task, isEditing, onUpdateSuccess}) =
         setDescription(e.target.value);
     };
 
-    const handlePriorityChange = (priority: Priority) => {
-        setPriority(priority);
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!title) {
             return;
         }
+
         if (isEditing && task) {
             const editedTask: TodoTask = {
-                id: task.id,
+                ...task,
                 title,
                 description,
                 priority,
-                isCompleted: task.isCompleted,
-                createdAt: task.createdAt
             };
+            
             updateMutation.mutate(editedTask, {
                 onSuccess: () => {
-                    if (onUpdateSuccess) {
-                        onUpdateSuccess();
+                    if (onSuccess) {
+                        onSuccess();
                     }
                 },
-
             });
         } else {
             const newTask: TodoCreateRequest = {
@@ -57,72 +52,97 @@ const TaskForm: React.FC<TaskFormProps> = ({task, isEditing, onUpdateSuccess}) =
                 description,
                 priority,
             };
-            createMutation.mutate(newTask,
-                {
-                    onSuccess: () => {
-                        if(onUpdateSuccess) {
-                            onUpdateSuccess();
-                        }
-                        setTitle('');
-                        setDescription('');
-                        setPriority(Priority.LOW);
-                    },
-
-                });
+            
+            createMutation.mutate(newTask, {
+                onSuccess: () => {
+                    setTitle('');
+                    setDescription('');
+                    if (onSuccess) {
+                        onSuccess();
+                    }
+                },
+            });
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white shadow-md rounded-lg">
+        <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white shadow-lg rounded-lg max-w-xl mx-auto">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">{isEditing ? 'Edit Task' : 'Add a Task'}</h2>
+                {isEditing && onClose && (
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700"
+                    >
+                        ✕
+                    </button>
+                )}
+            </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Title</label>
                 <input
                     type="text"
                     value={title}
                     onChange={handleTitleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    placeholder="Title"
+                    className="mt-1 block w-full border border-gray-300 rounded-lg p-2"
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                     value={description}
                     onChange={handleDescriptionChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                    placeholder="Description"
+                    className="mt-1 block w-full border border-gray-300 rounded-lg p-2 min-h-[100px]"
                 />
             </div>
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-                <div className="flex space-x-4 items-center justify-center">
+                <div className="flex space-x-4">
                     <button
                         type="button"
-                        onClick={() => handlePriorityChange(Priority.LOW)}
-                        className={`p-2 rounded-full ${priority === Priority.LOW ? 'bg-green-200' : 'bg-gray-200'} flex items-center space-x-2`}
+                        onClick={() => setPriority(Priority.LOW)}
+                        className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
+                            priority === Priority.LOW
+                                ? 'bg-green-100 border-green-500 text-green-700'
+                                : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
+                        }`}
                     >
-                        <FaArrowDown className="text-green-500"/>
-                        <span className="text-sm pr-2">Low</span>
+                        0 - Low
                     </button>
                     <button
                         type="button"
-                        onClick={() => handlePriorityChange(Priority.MEDIUM)}
-                        className={`p-2 rounded-full ${priority === Priority.MEDIUM ? 'bg-yellow-200' : 'bg-gray-200'} flex items-center space-x-2`}
+                        onClick={() => setPriority(Priority.MEDIUM)}
+                        className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
+                            priority === Priority.MEDIUM
+                                ? 'bg-yellow-100 border-yellow-500 text-yellow-700'
+                                : 'border-gray-300 hover:border-yellow-500 hover:bg-yellow-50'
+                        }`}
                     >
-                        <FaExclamation className="text-yellow-500"/>
-                        <span className="text-sm pr-2">Medium</span>
+                        1 - Medium
                     </button>
                     <button
                         type="button"
-                        onClick={() => handlePriorityChange(Priority.HIGH)}
-                        className={`p-2 rounded-full ${priority === Priority.HIGH ? 'bg-red-200' : 'bg-gray-200'} flex items-center space-x-2`}
+                        onClick={() => setPriority(Priority.HIGH)}
+                        className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
+                            priority === Priority.HIGH
+                                ? 'bg-red-100 border-red-500 text-red-700'
+                                : 'border-gray-300 hover:border-red-500 hover:bg-red-50'
+                        }`}
                     >
-                        <FaArrowUp className="text-red-500"/>
-                        <span className="text-sm pr-2">High</span>
+                        2 - High
                     </button>
                 </div>
             </div>
-            <div className="flex justify-center space-x-2">
-                <button type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md">{isEditing ? 'UPDATE' : 'ADD'}</button>
+            <div>
+                <div className="flex space-x-4 mt-6">
+                    <button
+                        type="submit"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full"
+                    >
+                        {isEditing ? 'Save Changes' : 'Add Task'}
+                    </button>
+                </div>
             </div>
         </form>
     );
